@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ayo Tidur Cepat!</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#14183d;--bg2:#222863;--card:#2d3480;--moon:#ffd88a;--mint:#8fe3bf;--coral:#ff8e8e;--ink:#f4f1ff;--soft:#b9b8e6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0,var(--bg2),var(--bg) 60%);color:var(--ink);font-family:"Baloo 2",system-ui,sans-serif;font-weight:500;display:flex;justify-content:center}
+#stars{position:fixed;inset:0;pointer-events:none;opacity:.6;background-image:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 120px 90px,#fff,transparent),radial-gradient(2px 2px at 220px 40px,#ffd88a,transparent),radial-gradient(1.5px 1.5px at 70px 160px,#fff,transparent);background-size:260px 200px}
+main{position:relative;width:100%;max-width:520px;padding:20px 16px 32px}
+h1{font-size:2.3rem;line-height:1.05;margin:8px 0;font-weight:800}
+h2{font-size:1.35rem;line-height:1.25;margin:8px 0 16px;font-weight:700}
+p{margin:0 0 12px;color:var(--soft);line-height:1.4}
+.moon{font-size:5rem;text-align:center;margin-top:24px;animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+button{font:inherit;cursor:pointer;color:var(--ink);border:0}
+button:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
+.menu{display:grid;gap:12px;margin-top:20px}
+.big{background:var(--card);border-radius:20px;padding:16px 18px;text-align:left;font-size:1.1rem;font-weight:700;display:flex;gap:14px;align-items:center;transition:transform .15s}
+.big:active{transform:scale(.97)}
+.big span.e{font-size:2.2rem}
+.big small{display:block;font-weight:500;color:var(--soft);font-size:.9rem}
+.bar{height:10px;background:var(--bg);border-radius:9px;overflow:hidden;margin:4px 0 6px}
+.bar i{display:block;height:100%;background:var(--moon);width:0;transition:width .4s}
+.top{display:flex;justify-content:space-between;color:var(--soft);font-size:.95rem}
+.opts{display:grid;gap:10px}
+.opt{background:var(--card);border-radius:16px;padding:13px 16px;text-align:left;font-size:1.05rem}
+.opt.ok{background:#2f7a5b}.opt.no{background:#8a3a4d}
+.opt:disabled{cursor:default;opacity:.95}
+.fb{min-height:64px;margin:14px 0 4px;color:var(--ink)}
+.next{background:var(--moon);color:#2a2255;border-radius:16px;padding:12px 22px;font-weight:800;font-size:1.05rem;display:none;margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.tile{background:var(--card);border-radius:18px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:2.6rem;transition:transform .15s,background .2s}
+.tile small{font-size:.78rem;color:var(--soft);font-weight:500;text-align:center;line-height:1.1;padding:0 4px}
+.tile:active{transform:scale(.93)}
+.tile.ok{background:#2f7a5b;opacity:.75}.tile.no{background:#8a3a4d;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.lives{letter-spacing:2px}
+.back{background:none;color:var(--soft);padding:6px 0;font-size:.95rem}
+.score{font-size:3.2rem;font-weight:800;color:var(--moon);text-align:center;margin:8px 0}
+.row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.row button{flex:1;min-width:140px;background:var(--card);border-radius:16px;padding:12px;font-weight:700;font-size:1rem}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<main id="app"></main>
+<script>
+var app=document.getElementById('app');
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function stars(n,max){var s='';for(var i=0;i<max;i++)s+=i<n?'⭐':'☆';return s}
+
+var RIDDLES=[
+{q:'Aku muncul saat malam. Kadang bulat, kadang sabit. Siapa aku?',o:['Bulan','Lampu jalan','Layang-layang'],a:0,e:'Bulan! Saat bulan muncul, itu tandanya waktunya bersiap tidur.'},
+{q:'Hewan apa yang suka begadang sambil bilang "hu-hu"?',o:['Ayam','Burung hantu','Kambing'],a:1,e:'Burung hantu. Dia memang hewan malam, tapi kamu bukan, jadi tidurlah!'},
+{q:'Kenapa ayam tidur cepat?',o:['Karena capek bertelur','Karena takut gelap','Karena besok harus berkokok pagi-pagi'],a:2,e:'Betul! Ayam tidur cepat supaya segar waktu berkokok. Kamu juga biar segar ke sekolah.'},
+{q:'Kakiku empat tapi tidak pernah berjalan. Kamu berbaring di atasku. Apa aku?',o:['Kursi','Tempat tidur','Meja'],a:1,e:'Tempat tidur. Tempat paling nyaman untuk istirahat.'},
+{q:'Kamu lihat di dalam tidur, tapi tidak nyata dan hilang saat bangun. Apa itu?',o:['Mimpi','Bayangan','Hantu'],a:0,e:'Mimpi. Mimpi indah datang kalau kamu tidur nyenyak.'},
+{q:'Anak sekolah sebaiknya tidur berapa jam setiap malam?',o:['4 sampai 5 jam','6 jam','9 sampai 10 jam'],a:2,e:'9 sampai 10 jam. Saat tidur, tubuh tumbuh dan otak merapikan pelajaran hari ini.'},
+{q:'Sebelum tidur, HP sebaiknya diapakan?',o:['Dimainkan sampai ngantuk','Dimatikan atau dijauhkan','Ditaruh di bantal'],a:1,e:'Dijauhkan. Cahaya layar membuat otak mengira masih siang.'},
+{q:'Apa yang terjadi kalau kurang tidur?',o:['Jadi lebih pintar','Jadi mengantuk dan susah fokus','Jadi tinggi'],a:1,e:'Mengantuk dan susah fokus. Tidur cukup bikin belajar lebih mudah.'}
+];
+
+var HABITS=[
+{e:'🪥',t:'Sikat gigi',g:1},{e:'📖',t:'Baca buku cerita',g:1},{e:'🛁',t:'Mandi air hangat',g:1},
+{e:'🥛',t:'Segelas susu hangat',g:1},{e:'🧸',t:'Peluk boneka',g:1},{e:'🌙',t:'Lampu diredupkan',g:1},
+{e:'📱',t:'Main HP',g:0},{e:'🎮',t:'Main game seru',g:0},{e:'☕',t:'Minum kopi',g:0},
+{e:'🍟',t:'Makan banyak',g:0},{e:'📺',t:'Nonton TV malam',g:0},{e:'🏃',t:'Lari-larian',g:0}
+];
+
+function menu(){
+ app.innerHTML='<div class="moon">🌙</div><h1>Ayo Tidur Cepat!</h1><p>Bantu si bulan mengantar kamu ke tempat tidur. Pilih permainanmu.</p>'+
+ '<div class="menu"><button class="big" id="m1"><span class="e">🦉</span><span>Tebak-tebakan<small>8 teka-teki seputar tidur</small></span></button>'+
+ '<button class="big" id="m2"><span class="e">👆</span><span>Pencet Gambar<small>Pencet kebiasaan baik sebelum tidur</small></span></button></div>';
+ document.getElementById('m1').onclick=riddle;
+ document.getElementById('m2').onclick=tapgame;
+}
+
+function header(title,i,n,right){
+ return '<button class="back" id="bk">‹ Menu</button><div class="top"><span>'+title+'</span><span>'+right+'</span></div><div class="bar"><i style="width:'+(i/n*100)+'%"></i></div>';
+}
+
+function riddle(){
+ var list=shuffle(RIDDLES),i=0,score=0;
+ function show(){
+  var r=list[i],opts=shuffle(r.o.map(function(t,k){return{t:t,c:k===r.a}}));
+  app.innerHTML=header('Pertanyaan '+(i+1)+' dari '+list.length,i,list.length,'Skor '+score)+
+   '<h2>'+r.q+'</h2><div class="opts"></div><div class="fb"></div><button class="next"></button>';
+  document.getElementById('bk').onclick=menu;
+  var box=app.querySelector('.opts'),fb=app.querySelector('.fb'),nx=app.querySelector('.next');
+  opts.forEach(function(o){
+   var b=document.createElement('button');b.className='opt';b.textContent=o.t;
+   b.onclick=function(){
+    var all=box.querySelectorAll('.opt');
+    all.forEach(function(x,k){x.disabled=true;if(opts[k].c)x.classList.add('ok')});
+    if(o.c){score++;fb.textContent='✅ Benar! '+r.e}else{b.classList.add('no');fb.textContent='❌ Belum tepat. '+r.e}
+    nx.textContent=i===list.length-1?'Lihat hasil':'Lanjut';nx.style.display='block';
+   };
+   box.appendChild(b);
+  });
+  nx.onclick=function(){i++;i<list.length?show():end()};
+ }
+ function end(){
+  var st=score>=7?3:score>=4?2:1;
+  app.innerHTML='<div class="moon">😴</div><h2 style="text-align:center">Tebak-tebakan selesai</h2><div class="score">'+score+' / '+list.length+'</div><p style="text-align:center;font-size:1.6rem">'+stars(st,3)+'</p>'+
+  '<p style="text-align:center">'+(st===3?'Hebat! Kamu siap tidur cepat malam ini.':st===2?'Bagus! Coba lagi supaya bintangmu penuh.':'Ayo coba lagi dan pelajari kebiasaan tidur sehat.')+'</p>'+
+  '<div class="row"><button id="a">Main lagi</button><button id="b">Pencet Gambar</button></div><div class="row"><button id="c">Menu</button></div>';
+  document.getElementById('a').onclick=riddle;document.getElementById('b').onclick=tapgame;document.getElementById('c').onclick=menu;
+ }
+ show();
+}
+
+function tapgame(){
+ var items=shuffle(HABITS),found=0,lives=3,total=HABITS.filter(function(h){return h.g}).length;
+ app.innerHTML=header('Pencet kebiasaan baik sebelum tidur',0,total,'<span class="lives" id="lv"></span>')+
+  '<p>Pencet semua gambar yang membantu kamu tidur cepat. Hati-hati, ada yang bikin susah tidur!</p><div class="grid"></div><div class="fb" id="fb"></div>';
+ document.getElementById('bk').onclick=menu;
+ var grid=app.querySelector('.grid'),bar=app.querySelector('.bar i'),fb=document.getElementById('fb');
+ function hearts(){document.getElementById('lv').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives)}
+ hearts();
+ items.forEach(function(h){
+  var b=document.createElement('button');b.className='tile';b.innerHTML=h.e+'<small>'+h.t+'</small>';
+  b.onclick=function(){
+   if(b.classList.contains('ok')||b.disabled)return;
+   if(h.g){
+    b.classList.add('ok');b.disabled=true;found++;bar.style.width=(found/total*100)+'%';fb.textContent='✅ '+h.t+' membuat badan tenang.';
+    if(found===total)finish(true);
+   }else{
+    b.classList.add('no');lives--;hearts();fb.textContent='❌ '+h.t+' malah bikin susah tidur.';
+    setTimeout(function(){b.classList.remove('no');b.disabled=true;b.style.opacity='.4'},350);
+    if(lives===0)finish(false);
+   }
+  };
+  grid.appendChild(b);
+ });
+ function finish(win){
+  setTimeout(function(){
+   app.innerHTML='<div class="moon">'+(win?'😴':'🥱')+'</div><h2 style="text-align:center">'+(win?'Selamat tidur!':'Hampir berhasil')+'</h2>'+
+   '<p style="text-align:center">'+(win?'Kamu menemukan semua kebiasaan baik. Sikat gigi, baca buku, lalu tidur ya.':'Kamu menemukan '+found+' dari '+total+' kebiasaan baik. Coba lagi!')+'</p>'+
+   '<p style="text-align:center;font-size:1.6rem">'+stars(win?(lives===3?3:lives===2?2:1):0,3)+'</p>'+
+   '<div class="row"><button id="a">Main lagi</button><button id="b">Tebak-tebakan</button></div><div class="row"><button id="c">Menu</button></div>';
+   document.getElementById('a').onclick=tapgame;document.getElementById('b').onclick=riddle;document.getElementById('c').onclick=menu;
+  },700);
+ }
+}
+menu();
+</script>
+</body>
+</html>
